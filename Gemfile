@@ -50,3 +50,5 @@ group :development, :test do
 end
 
 gem "rspec-rails", "~> 6.1.2", groups: [:development, :test]
+
+gem "bcrypt", "~> 3.1"
