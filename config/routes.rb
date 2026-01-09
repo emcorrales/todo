@@ -9,6 +9,13 @@ Rails.application.routes.draw do
   post "register" => "registrations#create"
   post "login" => "sessions#create"
 
+  # Tasks API
+  resources :tasks do
+    member do
+      patch :reorder
+    end
+  end
+
   # Defines the root path route ("/")
   # root "posts#index"
 end
