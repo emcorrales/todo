@@ -1,10 +1,10 @@
 class TasksController < ApplicationController
   include Authenticable
 
-  before_action :set_task, only: [:show, :update, :destroy, :reorder]
+  before_action :set_task, only: [ :show, :update, :destroy, :reorder ]
 
   def index
-    @tasks = current_user.tasks.ordered
+    @tasks = current_user.tasks.order(position: :asc)
     render json: @tasks, status: :ok
   end
 
