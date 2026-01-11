@@ -66,8 +66,6 @@ class TasksController < ApplicationController
     # and do not use it if it already exists.
     if user_tasks.where("position = ?", new_position).exists?
 
-      puts "meow #{new_position} #{old_position}"
-
       if new_position > old_position
 
         # Get last task between new_position and old_position.
@@ -86,7 +84,6 @@ class TasksController < ApplicationController
         task.update(position: new_position - (next_task.position + new_position)/2) if next_task
       end
     else
-      puts "hello"
       task.update(position: new_position)
     end
   end
