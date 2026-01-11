@@ -37,7 +37,7 @@ class TasksController < ApplicationController
   end
 
   def reorder
-    target_position = reorder_params[:position]
+    target_position = reorder_params[:position].to_f
     reorder_task(@task, target_position)
     render json: @task, status: :ok
   end
@@ -59,37 +59,25 @@ class TasksController < ApplicationController
   end
 
   def reorder_task(task, target_position)
-    old_position = task.position
     user_tasks = current_user.tasks.ordered
+    new_position = target_position
 
-    # When reordering, the task is supposed to use an existing position to
-    # replace or calculate it's next position.
     if user_tasks.where("position = ?", target_position).exists?
+        ceiling_position = target_position.floor + 1
 
-      # The task is going down the TODO list.
-      if target_position > old_position
+        nearest_position = user_tasks
+          .where(position: target_position.next_float..ceiling_position)
+          .minimum(:position)
 
-        max_possible_position = target_position.floor + 1
-
-        highest_position = user_tasks
-          .where(position: target_position..max_possible_position)
-          .maximum(:position)
-
-        offset = (max_possible_position - highest_position)/2.0
-
-        new_position = highest_position + offset
-
-        task.update(position: new_position)
-      end
-
-      if target_position < old_position
-
-        next_task = user_tasks.where(position: target_position..target_position - 1).
-        task.update(position: target_position - 0.5) if not next_task
-        task.update(position: target_position - (next_task.position + target_position)/2) if next_task
-      end
-    else
-      task.update(position: target_position)
+        available_space = 0
+        if nearest_position
+          available_space = (nearest_position - target_position)
+        else
+          available_space = (ceiling_position - target_position)
+        end
+        new_position += (available_space/2.0)
     end
+
+    task.update(position: new_position)
   end
 end
