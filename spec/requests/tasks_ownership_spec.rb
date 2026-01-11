@@ -1,18 +1,11 @@
 require 'rails_helper'
-require 'securerandom'
 
 RSpec.describe "Task ownership", type: :request do
-  let!(:user) { User.create!(username: "owner-#{SecureRandom.hex(4)}", password: "password") }
-  let!(:other) { User.create!(username: "other-#{SecureRandom.hex(4)}", password: "password") }
+  let!(:user) { create(:user) }
+  let!(:other) { create(:user) }
 
-  let!(:user_tasks) do
-    [
-      Task.create!(title: "A", position: 1, user: user),
-      Task.create!(title: "B", position: 2, user: user)
-    ]
-  end
-
-  let!(:other_task) { Task.create!(title: "Other", position: 1, user: other) }
+  let!(:user_tasks) { create_list(:task, 2, user: user) }
+  let!(:other_task) { create(:task, user: other) }
 
   def auth_header(u)
     token = JwtService.encode(user_id: u.id)

@@ -49,7 +49,11 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 end
 
-gem "rspec-rails", "~> 6.1.2", groups: [:development, :test]
+group :development, :test do
+  gem "factory_bot_rails"
+end
+
+gem "rspec-rails", "~> 6.1.2", groups: [ :development, :test ]
 
 gem "bcrypt", "~> 3.1"
 
