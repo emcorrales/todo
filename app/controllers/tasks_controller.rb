@@ -37,7 +37,7 @@ class TasksController < ApplicationController
   end
 
   def reorder
-    new_position = reorder_params[:position].to_i
+    new_position = reorder_params[:position]
     reorder_task(@task, new_position)
     render json: @task, status: :ok
   end
