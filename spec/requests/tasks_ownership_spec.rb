@@ -78,4 +78,29 @@ RSpec.describe "Task ownership", type: :request do
       expect(Task.exists?(other_task.id)).to be_truthy
     end
   end
+
+  describe "PATCH /tasks/:id/reorder" do
+    it "reorders own task" do
+      a = create(:task, user: user, position: 501)
+      b = create(:task, user: user, position: 502)
+      c = create(:task, user: user, position: 503)
+
+      patch "/tasks/#{c.id}/reorder", params: { task: { position: a.position } }, headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
+      c.reload
+      expect(c.position).to be > a.position
+      expect(c.position).to be < b.position
+
+      patch "/tasks/#{b.id}/reorder", params: { task: { position: a.position } }, headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
+      b.reload
+      expect(b.position).to be > a.position
+      expect(b.position).to be < c.position
+    end
+
+    it "prevents reordering another user's task" do
+      patch "/tasks/#{other_task.id}/reorder", params: { task: { position: 1.5 } }, headers: auth_header(user)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end
