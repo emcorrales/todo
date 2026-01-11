@@ -62,16 +62,32 @@ class TasksController < ApplicationController
     old_position = task.position
     user_tasks = current_user.tasks.ordered
 
-    if new_position < old_position
-      # Moving up: increment positions of tasks between new_position and old_position
-      user_tasks.where("position >= ? AND position < ?", new_position, old_position)
-        .update_all("position = position + 1")
-    elsif new_position > old_position
-      # Moving down: decrement positions of tasks between old_position and new_position
-      user_tasks.where("position > ? AND position <= ?", old_position, new_position)
-        .update_all("position = position - 1")
-    end
+    # Check if the new position is already taken
+    # and do not use it if it already exists.
+    if user_tasks.where("position = ?", new_position).exists?
 
-    task.update(position: new_position)
+      puts "meow #{new_position} #{old_position}"
+
+      if new_position > old_position
+
+        # Get last task between new_position and old_position.
+        next_task = user_tasks.where(position: new_position..new_position.ceil).last
+
+        # Insert right after new_position because there have been no other inserted tasks after it.
+        task.update(position: new_position + 0.5) if not next_task
+        # Insert between new_position and the previous inserted task position.
+        task.update(position: new_position + (next_task.position - new_position)/2) if next_task
+      end
+
+      if new_position < old_position
+
+        next_task = user_tasks.where(position: new_position..new_position - 1).
+        task.update(position: new_position - 0.5) if not next_task
+        task.update(position: new_position - (next_task.position + new_position)/2) if next_task
+      end
+    else
+      puts "hello"
+      task.update(position: new_position)
+    end
   end
 end
