@@ -36,4 +36,46 @@ RSpec.describe "Task ownership", type: :request do
       expect(response).to have_http_status(:not_found)
     end
   end
+
+  describe "POST /tasks" do
+    it "creates a task for the current user" do
+      params = { task: { title: "New Task", description: "New desc", completed: false } }
+      post "/tasks", params: params, headers: auth_header(user)
+      expect(response).to have_http_status(:created)
+      body = JSON.parse(response.body)
+      expect(body["title"]).to eq("New Task")
+      expect(body["user_id"]).to eq(user.id)
+    end
+  end
+
+  describe "PATCH /tasks/:id" do
+    it "updates own task" do
+      target = user_tasks.first
+      patch "/tasks/#{target.id}", params: { task: { title: "Updated" } }, headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["title"]).to eq("Updated")
+      expect(target.reload.title).to eq("Updated")
+    end
+
+    it "prevents updating another user's task" do
+      patch "/tasks/#{other_task.id}", params: { task: { title: "Hacked" } }, headers: auth_header(user)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe "DELETE /tasks/:id" do
+    it "deletes own task" do
+      target = user_tasks.first
+      delete "/tasks/#{target.id}", headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
+      expect(Task.exists?(target.id)).to be_falsey
+    end
+
+    it "prevents deleting another user's task" do
+      delete "/tasks/#{other_task.id}", headers: auth_header(user)
+      expect(response).to have_http_status(:not_found)
+      expect(Task.exists?(other_task.id)).to be_truthy
+    end
+  end
 end
