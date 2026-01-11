@@ -29,6 +29,12 @@ EDITOR=vim bin/rails credentials:edit
 
 How to run the test suite
 -----
+Run all test except the performance test.
 ```bash
 bundle exec rspec
+```
+
+Run performance test.
+```bash
+PERF=1 bundle exec rspec spec/requests/performance_spec.rb
 ```
