@@ -1,24 +1,31 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A simple TODO API built using Ruby on Rails.
 
-Things you may want to cover:
+Setup
+-----
 
-* Ruby version
+Install depencies.
+```bash
+bundle install
+```
+Run migrations.
+```bash
+bundle exec rails db:migrate
+```
+Configuration
+----
+You need a **config/master.key**.
+Maybe just delete and recreate **config/credentials.yml.enc**
+```bash
+rm config/credentials.yml.enc
+```
 
-* System dependencies
+then recreate the security credentials.
+```bash
+EDITOR=vim bin/rails credentials:edit
+```
 
-* Configuration
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+How to run the test suite
+-----
