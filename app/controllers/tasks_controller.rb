@@ -37,8 +37,8 @@ class TasksController < ApplicationController
   end
 
   def reorder
-    new_position = reorder_params[:position]
-    reorder_task(@task, new_position)
+    target_position = reorder_params[:position]
+    reorder_task(@task, target_position)
     render json: @task, status: :ok
   end
 
@@ -58,33 +58,38 @@ class TasksController < ApplicationController
     params.require(:task).permit(:position)
   end
 
-  def reorder_task(task, new_position)
+  def reorder_task(task, target_position)
     old_position = task.position
     user_tasks = current_user.tasks.ordered
 
-    # Check if the new position is already taken
-    # and do not use it if it already exists.
-    if user_tasks.where("position = ?", new_position).exists?
+    # When reordering, the task is supposed to use an existing position to
+    # replace or calculate it's next position.
+    if user_tasks.where("position = ?", target_position).exists?
 
-      if new_position > old_position
+      # The task is going down the TODO list.
+      if target_position > old_position
 
-        # Get last task between new_position and old_position.
-        next_task = user_tasks.where(position: new_position..new_position.ceil).last
+        max_possible_position = target_position.floor + 1
 
-        # Insert right after new_position because there have been no other inserted tasks after it.
-        task.update(position: new_position + 0.5) if not next_task
-        # Insert between new_position and the previous inserted task position.
-        task.update(position: new_position + (next_task.position - new_position)/2) if next_task
+        highest_position = user_tasks
+          .where(position: target_position..max_possible_position)
+          .maximum(:position)
+
+        offset = (max_possible_position - highest_position)/2.0
+
+        new_position = highest_position + offset
+
+        task.update(position: new_position)
       end
 
-      if new_position < old_position
+      if target_position < old_position
 
-        next_task = user_tasks.where(position: new_position..new_position - 1).
-        task.update(position: new_position - 0.5) if not next_task
-        task.update(position: new_position - (next_task.position + new_position)/2) if next_task
+        next_task = user_tasks.where(position: target_position..target_position - 1).
+        task.update(position: target_position - 0.5) if not next_task
+        task.update(position: target_position - (next_task.position + target_position)/2) if next_task
       end
     else
-      task.update(position: new_position)
+      task.update(position: target_position)
     end
   end
 end
