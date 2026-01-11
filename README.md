@@ -29,3 +29,6 @@ EDITOR=vim bin/rails credentials:edit
 
 How to run the test suite
 -----
+```bash
+bundle exec rspec
+```
