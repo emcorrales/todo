@@ -15,7 +15,7 @@ module Authenticable
     return render json: { error: "Invalid token" }, status: :unauthorized unless decoded
 
     @current_user = User.find_by(id: decoded["user_id"])
-    return render json: { error: "User not found" }, status: :unauthorized unless @current_user
+    render json: { error: "User not found" }, status: :unauthorized unless @current_user # rubocop:disable Style/RedundantReturn
   end
 
   def current_user
