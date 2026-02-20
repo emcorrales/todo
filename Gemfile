@@ -53,7 +53,7 @@ group :development, :test do
   gem "factory_bot_rails"
 end
 
-gem "rspec-rails", "~> 8.0.2", groups: [ :development, :test ]
+gem "rspec-rails", "~> 8.0.3", groups: [ :development, :test ]
 
 gem "bcrypt", "~> 3.1"
 
